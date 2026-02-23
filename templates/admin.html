@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="/static/admin/admin.css">
+</head>
+
+<body>
+
+    <h1>Admin Control Panel</h1>
+
+    <button id="logoutBtn">Logout</button>
+
+    <hr>
+
+    <h2>All Users</h2>
+    <button onclick="loadUsers()">Load Users</button>
+    <pre id="usersOutput"></pre>
+
+    <hr>
+
+    <h2>Get User By ID</h2>
+    <input type="number" id="getUid" placeholder="User ID">
+    <button onclick="getUser()">Get User</button>
+    <pre id="singleUserOutput"></pre>
+
+    <hr>
+
+    <h2>Update User</h2>
+    <input type="number" id="updateUid" placeholder="User ID">
+    <input type="text" id="updateRole" placeholder="New Role">
+    <input type="number" id="updateActive" placeholder="is_active (0/1)">
+    <button onclick="updateUser()">Update</button>
+    <pre id="updateOutput"></pre>
+
+    <hr>
+
+    <h2>Delete User</h2>
+    <input type="number" id="deleteUid" placeholder="User ID">
+    <button onclick="deleteUser()">Delete</button>
+    <pre id="deleteOutput"></pre>
+
+    <hr>
+
+    <h2>Create User</h2>
+    <input type="text" id="newEmail" placeholder="Email">
+    <input type="password" id="newPassword" placeholder="Password">
+    <input type="text" id="newRole" placeholder="Role">
+    <button onclick="createUser()">Create</button>
+    <pre id="createOutput"></pre>
+
+    <script src="/static/admin/admin.js"></script>
+</body>
+
+</html>

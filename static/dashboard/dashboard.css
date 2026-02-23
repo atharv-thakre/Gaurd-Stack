@@ -1,0 +1,52 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f6fa;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    margin-top: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+input {
+    display: block;
+    margin: 10px 0;
+    padding: 8px;
+    width: 100%;
+}
+
+button {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.danger {
+    background: #e74c3c;
+    color: white;
+    border: none;
+}
+
+.message {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.hidden {
+    display: none;
+}

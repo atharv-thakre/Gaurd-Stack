@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="/static/dashboard/dashboard.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="top-bar">
+            <h1 id="welcome">Dashboard</h1>
+            <button id="logoutBtn" class="danger">Logout</button>
+        </div>
+
+        <div class="card">
+            <h2>Profile Information</h2>
+            <p><strong>Email:</strong> <span id="email"></span></p>
+            <p><strong>Role:</strong> <span id="role"></span></p>
+            <p><strong>Name:</strong> <span id="name"></span></p>
+            <p><strong>Phone:</strong> <span id="phone"></span></p>
+            <p><strong>Status:</strong> <span id="status"></span></p>
+        </div>
+
+        <div class="card">
+            <h2>Update Profile</h2>
+            <input type="text" id="updateName" placeholder="New Name">
+            <input type="text" id="updatePhone" placeholder="New Phone">
+            <button onclick="updateProfile()">Update</button>
+            <p class="message" id="updateMessage"></p>
+        </div>
+
+        <div class="card">
+            <h2>Change Password</h2>
+            <input type="password" id="oldPassword" placeholder="Old Password">
+            <input type="password" id="newPassword" placeholder="New Password">
+            <button onclick="changePassword()">Change Password</button>
+            <p class="message" id="passwordMessage"></p>
+        </div>
+
+        <div id="adminSection" class="card hidden">
+            <h2>Admin Access</h2>
+            <button onclick="goToAdmin()">Go to Admin Panel</button>
+        </div>
+
+    </div>
+
+    <script src="/static/dashboard/dashboard.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Complete Profile</title>
+    <link rel="stylesheet" href="static/complete-profile/style.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Complete Your Profile</h2>
+
+        <div id="status-message" class="status"></div>
+
+        <!-- OTP Section -->
+        <div class="section">
+            <button id="sendOtpBtn">Send OTP</button>
+        </div>
+
+        <form id="verifyForm" class="section">
+            <input type="text" name="otp" placeholder="Enter OTP" maxlength="6" required>
+            <input type="text" name="phone" placeholder="Phone (optional)">
+            <button type="submit">Verify & Activate</button>
+        </form>
+    </div>
+
+    <script src="static/complete-profile/scripts.js"></script>
+</body>
+
+</html>
