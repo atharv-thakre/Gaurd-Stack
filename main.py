@@ -17,13 +17,21 @@ import sqlite3
 
 class SignupRequest(BaseModel):
     email: EmailStr
-    password: str = Field(min_length=8, max_length=60)
+    password: str = Field(min_length=4, max_length=60)
     name: str = Field(min_length=2, max_length=60)
     phone: Optional[str] = Field(default=None, min_length=10, max_length=10)
 
 class LoginRequest(BaseModel):
-    email: str
+    email: EmailStr
     password: str
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    otp: str = Field(..., min_length=6, max_length=6)
+    new_password: str = Field(..., min_length=4)
 
 class CompleteProfileRequest(BaseModel):
     otp: str = Field(min_length=6, max_length=6)
@@ -31,33 +39,31 @@ class CompleteProfileRequest(BaseModel):
     name: Optional[str] = Field(default=None, min_length=2)
 
 class UpdateProfileRequest(BaseModel):
-    name: Optional[str] = None
-    phone: Optional[str] = None
+    name: Optional[str] = Field(default=None, min_length=2, max_length=10)
+    phone: Optional[str] = Field(default=None, min_length=10, max_length=10)
+    
 
 class ChangePasswordRequest(BaseModel):
     old_password: str = Field(..., min_length=4)
     new_password: str = Field(..., min_length=4)
 
 class AdminUpdateRequest(BaseModel):
-    role: Optional[str] = None
-    is_active: Optional[int] = None
-    name: Optional[str] = None
-    phone: Optional[str] = None
-    email: Optional[str] = None
+    role: Optional[str] = "user"
+    is_active: Optional[int] = 0
+    name: Optional[str] = Field(default=None, min_length=2, max_length=10)
+    phone: Optional[str] = Field(default=None, min_length=10, max_length=10)
 
 class AdminCreateUser(BaseModel):
-    email: str
+    email: EmailStr
     password: str
     role: Optional[str] = "user"
-    name: Optional[str] = None
-    phone: Optional[str] = None
-    is_active: Optional[int] = 1
+    name: Optional[str] = Field(default=None, min_length=2, max_length=10)
+    phone: Optional[str] = Field(default=None, min_length=10, max_length=10)
+    is_active: Optional[int] = 0
 
 
 app = FastAPI()
-
-service.init_user_db()
-
+service.init_user_db() 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 #===============================HOME ROUTES===============================
@@ -106,6 +112,51 @@ def login(data: LoginRequest):
         "access_token": token,
         "token_type": "bearer"
     }
+#==========================FORGOT PASSWORD ROUTES==========================
+
+@app.get("/forgot-password")
+def forgot_page():
+    return FileResponse("templates/forgot-password.html")
+
+@app.post("/auth/forgot-password")
+def forgot_password(data: ForgotPasswordRequest):
+
+    user = service.get_user(email=data.email)
+
+    # Always return success message
+    if not user:
+        return {"message": "If account exists, OTP has been sent"}
+
+    # Rate limit
+    if not otp_service.can_send_otp(user["uid"]):
+        raise HTTPException(
+            status_code=429,
+            detail="Please wait before requesting another OTP"
+        )
+
+    otp = otp_service.create_otp()
+
+    email_sent = email_control.send_email_otp(user["email"], otp)
+
+    if email_sent:
+        otp_service.store_otp(user["uid"], otp)
+
+    return {"message": "If account exists, OTP has been sent"}
+
+@app.post("/auth/reset-password")
+def reset_password(data: ResetPasswordRequest):
+    user = service.get_user(email=data.email)
+
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid request")
+
+    valid = otp_service.verify_otp(user["uid"], data.otp)
+
+    if not valid:
+        raise HTTPException(status_code=400, detail="Invalid or expired OTP")
+
+    admin.reset_password(user["uid"], data.new_password)
+    return {"message": "Password reset successful"}
 
 #==============================PROFILE ROUTES==============================
 
@@ -131,7 +182,17 @@ def send_otp(current_user: dict = Depends(get_current_user)):
 
     # Already active user should not request OTP
     if current_user["is_active"]:
-        raise HTTPException(status_code=400, detail="Account already active")
+        raise HTTPException(
+            status_code=400,
+            detail="Account already active"
+        )
+
+    # Rate limiting
+    if not otp_service.can_send_otp(current_user["uid"]):
+        raise HTTPException(
+            status_code=429,
+            detail="Please wait before requesting another OTP"
+        )
 
     # Generate OTP
     otp = otp_service.create_otp()
@@ -140,7 +201,10 @@ def send_otp(current_user: dict = Depends(get_current_user)):
     email_sent = email_control.send_email_otp(current_user["email"], otp)
 
     if not email_sent:
-        raise HTTPException(status_code=500, detail="Failed to send OTP")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to send OTP"
+        )
 
     # Store OTP only after successful send
     otp_service.store_otp(current_user["uid"], otp)

@@ -82,3 +82,36 @@ def verify_otp(uid: int, otp: str) -> bool:
     conn.close()
 
     return True
+
+def can_send_otp(uid: int, cooldown_seconds: int = 60) -> bool:
+    """
+    Returns True if user CAN send OTP.
+    Returns False if still in cooldown.
+    """
+
+    conn = service.get_user_conn()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT expires_at
+        FROM email_otps
+        WHERE uid = ?
+        ORDER BY id DESC
+        LIMIT 1
+    """, (uid,))
+
+    row = cur.fetchone()
+    conn.close()
+
+    if not row:
+        return True  # No previous OTP
+
+    expires_at = row[0]
+    created_at = expires_at - OTP_EXPIRY_SECONDS
+
+    current_time = int(time.time())
+
+    if current_time - created_at < cooldown_seconds:
+        return False
+
+    return True

@@ -113,3 +113,12 @@ def activate_user(uid : int , status : int ) :
     conn.commit()
     conn.close()
     return
+
+def reset_password(uid : int , new_password : str ) :
+    conn = service.get_user_conn()
+    cur = conn.cursor()
+    new_hash = service.simple_hash(new_password)
+    cur.execute('''Update users set password =? where uid =? ''' , (new_hash , uid))
+    conn.commit()
+    conn.close()
+    return
